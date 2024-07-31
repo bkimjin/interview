@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: stg
+    description: Raw data from Ashby for the take home assignment.
+    database: ashby
+    schema: main
+
+    tables:
+      - name: applications
+      - name: interview_stages_and_groups
+      - name: jobs
+      - name: source_types
+      - name: sources
+      - name: stage_transitions
+      - name: teams
+      - name: users
