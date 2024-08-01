@@ -3,7 +3,7 @@ SELECT
     id
 
     /* foreign keys */
-    , application_id
+    , application_id -- joins to applications
     , new_interview_stage_id
     , organization_id
     , previous_interview_stage_id

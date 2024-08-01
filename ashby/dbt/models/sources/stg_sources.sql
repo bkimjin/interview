@@ -1,3 +1,11 @@
+/*
+    Clean up raw data by organizing columns and type casting.
+    Details on the source. Individual source details are omitted except the source ID. 1 row per unique source
+    
+    Relationships
+    many:1 with source_types
+    1:1 with applications
+*/
 SELECT
     /* primary key */
     id

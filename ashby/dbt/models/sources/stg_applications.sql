@@ -1,4 +1,7 @@
-/* Clean up raw data by organization and type casting. */
+/*
+    Clean up raw data by organizing columns and type casting.
+    Contains data about the candidate application details.
+*/
 SELECT
     /* primary key */
     id
@@ -16,6 +19,6 @@ SELECT
     , last_activity_at::TIMESTAMPTZ AS last_activity_at
     
     /* properties */
-    , status
+    , lower(status) AS status
 
 FROM {{ source('stg', 'applications') }}

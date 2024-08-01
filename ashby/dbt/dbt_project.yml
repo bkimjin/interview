@@ -14,9 +14,12 @@ clean-targets:
   - logs
 
 models:
-  ashby:
-    marts:
+  asbhy_interview:
+    intermediate:
+      +materialized: table
+    mart:
       +materialized: table
     sources:
-      +materialized: table
+      # No need to reinstantiate the data again if the raw data is available and limited transformations are being applied.
+      +materialized: view
       +tags: ["source"]

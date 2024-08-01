@@ -1,3 +1,6 @@
+/*
+    While it appears that users can be used for the other data sources, there is no way to join the data to the other datasets.
+*/
 SELECT
     /* primary key */
     id

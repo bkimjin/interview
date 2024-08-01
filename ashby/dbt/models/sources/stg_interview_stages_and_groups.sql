@@ -1,11 +1,15 @@
+/*
+    Clean up raw data by organizing columns and type casting.
+    Contains details about interview stages and stage group mappings.
+*/
 SELECT
     /* primary key */
     stage_id
 
     /* foreign keys */
-    , interview_stage_group_id
-    , organization_id
-    , stage_group_id
+    , interview_stage_group_id -- this does not connect to any available source
+    , organization_id -- this does not connect to any available source
+    , stage_group_id -- this does not connect to any available source
 
     /* timestamps */
     , created_at::TIMESTAMPTZ AS created_at
@@ -13,7 +17,7 @@ SELECT
     /* properties */
     , stage_group_order
     , stage_group_title
-    , stage_group_type
+    , LOWER(stage_group_type) AS stage_group_type
     , stage_order
     , stage_type
     , title

@@ -23,9 +23,9 @@ Datasets were downloaded from the instructions for the Ashby assignment [here](h
 Below are the tools used for the Ashby assignment:
 ```
 Visual Studio Code (https://code.visualstudio.com/)
-Python (https://www.python.org/downloads/)
+Python v3.10.14 (https://www.python.org/downloads/)
 DuckDB (https://duckdb.org/)
-Tableau (https://www.tableau.com/)
+Docker (https://www.docker.com/)
 ```
 
 The following are the Python packages required to enable the data pipeline. These Python packages can be installed by pip:
@@ -33,9 +33,41 @@ The following are the Python packages required to enable the data pipeline. Thes
 dbt-core
 dbt-duckdb
 jupyterlab
-apache-superset
 setuptools
 ```
+
+## Installation
+> **NOTE:** Docker is to install Apache Superset. Ignore this step if the visualization tool is not required.
+
+Once the above tools and packages are installed, initialize Superset by cloning the Superset repository via `git clone https://github.com/apache/superset.git` into a directory. Then, navigate into the superset directory in terminal, and run the following command to start up Superset:
+
+docker compose -f docker-compose-non-dev.yml up
+
+## Brainstorm
+Once all dbt models are organized, I proceeded to go through each of the data sources to organize and understand the relationship between the different sources. At a quick glance, these sources appeared to be grouped as below:
+
+Data Sources & Their Relationship
+```mermaid
+    erDiagram
+
+    "Source Type" ||--o{ Source: contains
+    Application }o--|| Job: for
+    Application only one to zero or one Source: "can have"
+    Application ||--o{ "Stage Transition": has
+    "Stage Transition" ||--|| "Interview Stage and Group": has
+    Job }o--|| Team: "associated to"
+    Team ||--o{ Team: "can have"
+    User    
+```
+Legend:
+    || refers to exactly one
+    }| or |{ refers to one or more
+    |o or o| refers to zero or one
+    }o or o{ refers to zero or more
+
+    Many sources belong to a source type, but a source can't have multiple sources.
+    id4[Applications]<-->id6[sources];
+
 
 # Pipeline Setup [↑](#table-of-contents)
 
@@ -73,5 +105,7 @@ Once the initial infrastructure was set (inserting the data into duckDB and buil
 # Closing Comments [↑](#table-of-contents)
 To create a python script to read the raw data and create the duckdb database. Unfortunately there were some issues that were preventing me from proceeding and was taking too much time to resolve. 
 
-2024-07-30: 10-1:18
-2024-07-30: 4-5
+2024-07-30: 10-1:18 - install setup sans visualization
+2024-07-30: 4-5     - visualization setup
+2024-07-31: 2-5     - visualization setup..
+2024-07-31: 7:15-11 - model setup

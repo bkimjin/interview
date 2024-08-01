@@ -1,3 +1,11 @@
+/*
+    Clean up raw data by organizing columns and type casting.
+    Contains detail about the job itself.
+    
+    Relationships
+    1:1 with applications
+    1:1 with teams
+*/
 SELECT
     /* primary key */
     id

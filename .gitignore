@@ -2,3 +2,8 @@ target/
 dbt_packages/
 .user.yml
 *.log
+.venv3*
+.DS_STORE
+__pycache__/
+ashby/dbt/package-lock.yml
+.ipynb_checkpoints/

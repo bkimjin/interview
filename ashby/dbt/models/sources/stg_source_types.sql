@@ -1,3 +1,10 @@
+/*
+    Clean up raw data by organizing columns and type casting.
+    Details on the source types.
+    
+    Relationships
+    1:many with sources
+*/
 SELECT
     /* primary key */
     id
