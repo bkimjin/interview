@@ -7,3 +7,26 @@ dbt_packages/
 __pycache__/
 ashby/dbt/package-lock.yml
 .ipynb_checkpoints/
+
+.venv
+*.egg-info/
+*.csv
+*.json
+*.db
+tmp*
+__pycache__
+target/
+dbt_packages/
+logs/
+*.duckdb
+*.env
+**/.logs_queue
+**/.nux
+**/.telemetry
+**/history
+**/schedules
+**/storage
+
+# Keeps
+!geography.csv
+!dashboard.json

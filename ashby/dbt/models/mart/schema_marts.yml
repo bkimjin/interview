@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: mart_applications
+    columns:
+      - name: id
+        tests:
+          - unique
+  - name: mart_time_in_process
+    columns:
+      - name: id
+        tests:
+          - unique

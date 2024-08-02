@@ -1,17 +1,11 @@
 This repository contains the take home assignment for Ashby's take home assignment.
 
 # Table of Contents
-
 ## [Prerequiste](#prerequiste-)
-
-## [Pipeline Setup](#pipeline-setup-)
-
-## [Data Quality Tests](#data-quality-tests-)
-
-## [Data Visualization](#data-visualization-)
-
 ## [Design Decisions](#design-decisions-)
-
+## [Pipeline Setup](#pipeline-setup-)
+## [Data Quality Tests](#data-quality-tests-)
+## [Data Visualization](#data-visualization-)
 ## [Closing Comments](#closing-comments-)
 
 # Prerequiste [↑](#table-of-contents)
@@ -32,19 +26,13 @@ The following are the Python packages required to enable the data pipeline. Thes
 ```
 dbt-core
 dbt-duckdb
-jupyterlab
 setuptools
 ```
 
-## Installation
-> **NOTE:** Docker is to install Apache Superset. Ignore this step if the visualization tool is not required.
+# Design Decisions [↑](#table-of-contents)
 
-Once the above tools and packages are installed, initialize Superset by cloning the Superset repository via `git clone https://github.com/apache/superset.git` into a directory. Then, navigate into the superset directory in terminal, and run the following command to start up Superset:
-
-docker compose -f docker-compose-non-dev.yml up
-
-## Brainstorm
-Once all dbt models are organized, I proceeded to go through each of the data sources to organize and understand the relationship between the different sources. At a quick glance, these sources appeared to be grouped as below:
+## Outline
+I went through each of the data sources to organize and understand the relationship between the different sources. At a quick glance, these sources appeared to be grouped as below:
 
 Data Sources & Their Relationship
 ```mermaid
@@ -59,53 +47,76 @@ Data Sources & Their Relationship
     Team ||--o{ Team: "can have"
     User    
 ```
-Legend:
-    || refers to exactly one
-    }| or |{ refers to one or more
-    |o or o| refers to zero or one
-    }o or o{ refers to zero or more
 
-    Many sources belong to a source type, but a source can't have multiple sources.
-    id4[Applications]<-->id6[sources];
+In the chart above, it shows that a single `Source Type` maps to 0 or more `Sources`, an `Application` has 0 or 1 `Source`, 0 or more `Applications` are part of a `Job`, a `Team` is associated to 0 or more `Job`, a `Team` can have 0 or more `Teams` under itself, an `Application` has 0 or more `Stage Transitions`, and a Stage Transition has a 1 to 1 relationship with `Interview Stage and Group`. `Users` does not map to any other data source.
 
+## Database Choice
+Duckdb was picked as the database to hold all the data and to run the dbt models against. While a cloud database could have made sense (to mimic the actual production environment in Ashby), for this specific assignment a full cloud instance is overkill for this project. Since this is also a self contained project, not having to connect to the cloud would speed up model development, and any potential run time issues would not make a costly error. Since everything is hosted locally as well, security would not be a big concern either.
+
+## Visualization Choice
+Picking duckdb as the database however, did come with some drawbacks. A big issue being that not a lot of BI tools support it. With limited online documentation and a limited duration, I opted to use an existing resource that had Superset and duckdb setup already (`superset-readme.md` and `LICENSE` are from the owner's repository). Modifications were made to strip out the excess and only keep the necessary files to run Superset.
 
 # Pipeline Setup [↑](#table-of-contents)
+
+## Insert Data Into Database
+> **NOTE:** This step is not required but can be followed to reinsert the raw data into the database. Otherwise, this step can be ignored.
 
 Navigate to `ashby/database` in a terminal and run the following command
 ```
 duckdb ashby.db
 ```
 
-Then copy and paste the following commands within the duckdb CLI. This will create the respective tables for all the data downloaded.
+Copy and paste the following commands within the duckdb CLI. This will create the respective tables for all the data downloaded.
 ```
-CREATE TABLE applications AS SELECT * FROM '../raw_data/2024 - Data Take Home - Applications.csv';
-CREATE TABLE interview_stages_and_groups AS SELECT * FROM '../raw_data/2024 - Data Take Home - Interview Stages and Groups.csv';
-CREATE TABLE jobs AS SELECT * FROM '../raw_data/2024 - Data Take Home - Jobs.csv';
-CREATE TABLE source_types AS SELECT * FROM '../raw_data/2024 - Data Take Home - Source Types.csv';
-CREATE TABLE sources AS SELECT * FROM '../raw_data/2024 - Data Take Home - Sources.csv';
-CREATE TABLE stage_transitions AS SELECT * FROM '../raw_data/2024 - Data Take Home - Stage Transitions.csv';
-CREATE TABLE teams AS SELECT * FROM '../raw_data/2024 - Data Take Home - Teams.csv';
-CREATE TABLE users AS SELECT * FROM '../raw_data/2024 - Data Take Home - Users.csv';
+CREATE OR REPLACE TABLE applications AS SELECT * FROM '../raw_data/2024 - Data Take Home - Applications.csv';
+CREATE OR REPLACE TABLE interview_stages_and_groups AS SELECT * FROM '../raw_data/2024 - Data Take Home - Interview Stages and Groups.csv';
+CREATE OR REPLACE TABLE jobs AS SELECT * FROM '../raw_data/2024 - Data Take Home - Jobs.csv';
+CREATE OR REPLACE TABLE source_types AS SELECT * FROM '../raw_data/2024 - Data Take Home - Source Types.csv';
+CREATE OR REPLACE TABLE sources AS SELECT * FROM '../raw_data/2024 - Data Take Home - Sources.csv';
+CREATE OR REPLACE TABLE stage_transitions AS SELECT * FROM '../raw_data/2024 - Data Take Home - Stage Transitions.csv';
+CREATE OR REPLACE TABLE teams AS SELECT * FROM '../raw_data/2024 - Data Take Home - Teams.csv';
+CREATE OR REPLACE TABLE users AS SELECT * FROM '../raw_data/2024 - Data Take Home - Users.csv';
 .quit
 ```
 
-Copy `profiles.yml` where dbt profiles should exist (on MacOS, this is usually `~/.dbt/profiles.yml`).
+## Update dbt
+> **NOTE:** This step can be ignored if running dbt is not required.
+
+Copy `dbt/profiles.yml` where dbt profiles should exist (on MacOS, this is usually `~/.dbt/profiles.yml`).
+
+Run the following dbt commands to verify the duckdb connector and to install the dbt packages:
+```
+dbt debug
+dbt deps
+```
 
 
-### Database
+## Initialize Superset
+> **NOTE:** Docker is used to install Apache Superset. Running docker commands requires the user to create and be logged into Docker.
 
+> **NOTE:** Superset user and password can be adjusted as needed in `.env`.
+
+Navigate to the root directory and run the below command:
+
+```
+docker compose up --build
+```
+
+Once the image is ready, navigate to http://localhost:8088 to login to Superset using the admin user and passwords listed in `.env`.
+
+> **NOTE:** Newly created dashboards will not save if created by the UI. To persist the dashboards, select all dashboards on the dashboard list and export them, rename the zip file to `dashboard.zip`, and replace the file in `ashby/superset/assets`.
 
 # Data Quality Tests [↑](#table-of-contents)
+The tests that have been initialized for the models are primarily related to the uniqueness (for primary keys), accepted values (for status and types), and non null values (for required fields).
+
+For `stg_applications`, even though the assignment prompt states that an application can only be `archived`, `hired`, or `active`, `lead` is added as a potential accepted value to prevent an issue with the dbt tests. A follow up to this assignment could be to look into whether the assignment prompt was incorrect or the data is incorrect.
 
 # Data Visualization [↑](#table-of-contents)
-
-# Design Decision [↑](#table-of-contents)
-Once the initial infrastructure was set (inserting the data into duckDB and building the staging dbt models), I started diving deeper into the questions that this take home assignment was meant to answer to build the downstream models and the visualizations.
+To run the data visualization tool Superset, Docker will need to be installed. Once installed, navigate to the root directory and run the command `docker compose up --build`. Any newly created dashboards and charts must be exported, or will be removed on the docker image closing and will not be available when the image runs subsequent times.
 
 # Closing Comments [↑](#table-of-contents)
-To create a python script to read the raw data and create the duckdb database. Unfortunately there were some issues that were preventing me from proceeding and was taking too much time to resolve. 
+The immediate next step for this project would be to incorporate more automated testing tools as part of the CI/CD workflow to handle data quality tests. While dbt tests can be useful, they are relatively basic data governance tools.
 
-2024-07-30: 10-1:18 - install setup sans visualization
-2024-07-30: 4-5     - visualization setup
-2024-07-31: 2-5     - visualization setup..
-2024-07-31: 7:15-11 - model setup
+Afterwards,it would be to expand on the documentation for the dbt models and setting up the workflow to automate the dbt documentation on the visualization datasets/charts.
+
+Another low priority project would be to automate setting up the work environment, as roughly 50% of the time spent for this project was actually related to getting the environment setup correctly.

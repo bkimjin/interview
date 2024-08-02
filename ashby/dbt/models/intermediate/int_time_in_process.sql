@@ -23,14 +23,15 @@ SELECT
     /* timestamps */
     , applications.created_at AS application_begin_at
     , stage_transitions.entered_stage_at AS application_end_at
-    , application_end_at - application_begin_at AS time_in_process
 
     /* properties */
     , applications.status
+    , {{ datediff("application_begin_at", "application_end_at", "minute") }} AS time_in_process_minutes
+    , {{ datediff("application_begin_at", "application_end_at", "day") }} AS time_in_process_days
 
     /* boolean */
     -- These applications have a time difference of less than 1 minute, which may need to be reviewed to verify they were closed correctly.
-    , CASE WHEN {{ datediff("application_begin_at", "application_end_at", "minute") }} < 1 THEN TRUE ELSE FALSE END AS is_review_required
+    , CASE WHEN time_in_process_minutes < 1 THEN TRUE ELSE FALSE END AS is_review_required
 FROM {{ ref('stg_applications') }} AS applications
 LEFT JOIN {{ ref('stg_stage_transitions') }} AS stage_transitions ON applications.id = stage_transitions.application_id
 LEFT JOIN {{ ref('stg_interview_stages_and_groups') }} AS interview_groups ON stage_transitions.new_interview_stage_id = interview_groups.stage_id

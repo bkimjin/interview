@@ -1,3 +1,57 @@
 version: 2
 models:
   - name: stg_applications
+    columns:
+      - name: id
+        tests:
+          - unique
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['hired', 'archived', 'active', 'lead']
+  - name: stg_interview_stages_and_groups
+    columns:
+      - name: stage_id
+        tests:
+          - unique
+      - name: stage_group_type
+        tests:
+          - accepted_values:
+              values: ['lead', 'hired', 'active', 'preinterviewscreen', 'offer', 'archived']
+  - name: stg_jobs
+    columns:
+      - name: id
+        tests:
+          - unique
+  - name: stg_source_types
+    columns:
+      - name: id
+        tests:
+          - unique
+      - name: title
+        tests:
+          - accepted_values:
+              values: ['internal', 'lead', 'sourced', 'job boards', 'inbound', 'referral', 'platform', 'agencies', 'other']
+  - name: stg_sources
+    columns:
+      - name: id
+        tests:
+          - unique
+  - name: stg_stage_transitions
+    columns:
+      - name: id
+        tests:
+          - unique
+      - name: entered_stage_at
+        tests:
+          - not_null
+  - name: stg_teams
+    columns:
+      - name: id
+        tests:
+          - unique
+  - name: stg_users
+    columns:
+      - name: id
+        tests:
+          - unique

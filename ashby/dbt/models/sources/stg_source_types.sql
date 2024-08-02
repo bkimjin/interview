@@ -16,7 +16,7 @@ SELECT
     , created_at::TIMESTAMPTZ AS created_at
 
     /* properties */
-    , title
+    , LOWER(title) AS title
 
     /* booleans */
     , is_archived

@@ -20,7 +20,7 @@ SELECT
     , LOWER(stage_group_type) AS stage_group_type
     , stage_order
     , stage_type
-    , title
+    , LOWER(title) AS stage_title
 
     /* booleans */
     , archived AS is_archived
